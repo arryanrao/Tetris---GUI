@@ -1,0 +1,277 @@
+import pygame
+import sys
+# import the button class
+from Files import Button
+
+# initialize the display
+pygame.init()
+screen = pygame.display.set_mode((1280, 720))
+pygame.display.set_caption("Tetris")
+
+score = 0
+total_lines = 0
+
+
+# the two functions below make creating a font for any text easier
+def get_font(size):
+	return pygame.font.Font("font.ttf", size)
+
+
+def get_font2(size):
+	return pygame.font.Font("font2.TTF", size)
+
+
+# function for the username input screen
+def username_input():
+	screen.fill("#145365")
+	username = ""
+	while True:
+		user_mouse_pos = pygame.mouse.get_pos()
+		name_font = pygame.font.Font("font4.ttf", 32)
+
+		# loads the back button onto the screen
+		user_back = Button(image=pygame.image.load("base_button.png"), pos=(780, 540), text_input="BACK", font=get_font(75), base_color="white", hovering_color="Green")
+		user_back.color_changer(user_mouse_pos)
+		user_back.update(screen)
+
+		# loads the enter button onto the screen
+		user_enter = Button(image=pygame.image.load("base_button.png"), pos=(500, 540), text_input="ENTER", font=get_font(75), base_color="white", hovering_color="Green")
+		user_enter.color_changer(user_mouse_pos)
+		user_enter.update(screen)
+
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:  # closes the game if the X button is clicked on the top right of the window
+				pygame.quit()
+				sys.exit()
+			elif event.type == pygame.KEYDOWN and len(username) <= 10:  # deals with any situation where a key is pressed
+				if event.key == pygame.K_BACKSPACE:  # removes the newest character from the string
+					username = username[:-1]
+				elif event.key == pygame.K_SPACE:  # renders spaces invalid
+					pass
+				elif event.key == pygame.K_RETURN:  # starts the game after enter is pressed
+					start(username)
+				else:
+					if len(username) < 10:  # sets the character limit
+						username += event.unicode  # unicode adds whatever keys are pressed to the username empty string
+			# the MOUSEBUTTONDOWN framework is used for every button press in every function
+			elif event.type == pygame.MOUSEBUTTONDOWN:
+				if user_enter.input_checker(user_mouse_pos):  # if the enter button is pressed, start the game
+					start(username)
+				elif user_back.input_checker(user_mouse_pos):  # if the back button is pressed, return to main menu
+					main_menu()
+
+		# put the username box and username string on the screen
+		username_image = pygame.image.load("username_png.png")
+		screen.blit(username_image, (520, 270))
+		username_surface = name_font.render(username, True, "black")
+		screen.blit(username_surface, (530, 275))
+		pygame.display.update()
+
+		# puts the username instructions on the screen
+		username_text = pygame.font.SysFont("arial black", 30).render("PLEASE ENTER A USERNAME", True, "white")
+		username_text2 = pygame.font.SysFont("arial black", 15).render("It must be all letters, no spaces, and have a max character count of 10.", True, "white")
+		username_text3 = pygame.font.SysFont("arial black", 15).render("Press the enter key or button to play.", True, "white")
+		username_text_rect = username_text.get_rect(center=(640, 180))
+		username_text2_rect = username_text2.get_rect(center=(640, 230))
+		username_text3_rect = username_text2.get_rect(center=(770, 250))
+		screen.blit(username_text, username_text_rect)
+		screen.blit(username_text2, username_text2_rect)
+		screen.blit(username_text3, username_text3_rect)
+
+		pygame.display.update()  # updates the display; present in every function
+
+
+def start(username):
+	while True:
+		play_mouse_pos = pygame.mouse.get_pos()
+		screen.fill("#145365")
+
+		# puts the three images for stats, next piece and hold piece on the screen
+		points_image = pygame.image.load("points_button.png")
+		screen.blit(points_image, (50, 250))
+		next_pieces = pygame.image.load("next_pieces.png")
+		screen.blit(next_pieces, (1000, 300))
+		next_text = pygame.font.Font("font.ttf", 50).render("NEXT", True, "white")
+		next_text_rect = next_text.get_rect(center=(1130, 350))
+		screen.blit(next_text, next_text_rect)
+		score_text = pygame.font.Font("font.ttf", 50).render("SCORE", True, "white")
+		score_text_rect = score_text.get_rect(center=(180, 290))
+		screen.blit(score_text, score_text_rect)
+		level_text = pygame.font.Font("font.ttf", 50).render("LEVEL", True, "white")
+		level_text_rect = level_text.get_rect(center=(180, 415))
+		screen.blit(level_text, level_text_rect)
+		lines_text = pygame.font.Font("font.ttf", 50).render("LINES", True, "white")
+		lines_text_rect = lines_text.get_rect(center=(180, 530))
+		screen.blit(lines_text, lines_text_rect)
+
+		# puts the pause button on the screen using button class
+		pause_button = Button(image=pygame.image.load("pause_button.png"), pos=(1230, 40), text_input="", font=get_font(75), base_color="white", hovering_color="Green")
+		pause_button.update(screen)
+
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+				sys.exit()
+			elif event.type == pygame.MOUSEBUTTONDOWN:
+				if pause_button.input_checker(play_mouse_pos):  # brings the pause screen when pause button is clicked
+					pause_menu(username)
+
+		pygame.display.update()
+
+
+def scores():
+	while True:
+		scores_mouse_pos = pygame.mouse.get_pos()
+		screen.fill("#145365")
+		scores_text = get_font(45).render("This is the SCORES screen.", True, "Black")
+		scores_rect = scores_text.get_rect(center=(640, 260))
+		screen.blit(scores_text, scores_rect)
+		scores_back = Button(image=pygame.image.load("base_button.png"), pos=(640, 460), text_input="BACK", font=get_font(75), base_color="white", hovering_color="Green")
+		scores_back.color_changer(scores_mouse_pos)
+		scores_back.update(screen)
+
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+				sys.exit()
+			elif event.type == pygame.MOUSEBUTTONDOWN:
+				if scores_back.input_checker(scores_mouse_pos):
+					main_menu()
+
+		pygame.display.update()
+
+
+def controls():
+	while True:
+		controls_mouse_pos = pygame.mouse.get_pos()
+		screen.fill("#145365")
+
+		# loads the png of controls/rules and scales it down to fit the screen size
+		controls_png = pygame.image.load("controls_png.png")
+		c_png_size = 511, 518
+		scaled_controls_png = pygame.transform.scale(controls_png, c_png_size)
+		screen.blit(scaled_controls_png, (380, 10))
+
+		# creates the back button
+		controls_back = Button(image=pygame.image.load("base_button.png"), pos=(640, 620), text_input="BACK", font=get_font(75), base_color="white", hovering_color="Green")
+		controls_back.color_changer(controls_mouse_pos)
+		controls_back.update(screen)
+
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+				sys.exit()
+			elif event.type == pygame.MOUSEBUTTONDOWN:
+				if controls_back.input_checker(controls_mouse_pos):
+					main_menu()
+
+		pygame.display.update()
+
+
+# this function does the exact same thing as the normal controls menu, but with one difference
+def controls_pause(username):
+	while True:
+		controls_mouse_pos = pygame.mouse.get_pos()
+		screen.fill("#145365")
+
+		controls_png = pygame.image.load("controls_png.png")
+		c_png_size = 511, 518
+		scaled_controls_png = pygame.transform.scale(controls_png, c_png_size)
+		screen.blit(scaled_controls_png, (380, 10))
+
+		controls_back = Button(image=pygame.image.load("base_button.png"), pos=(640, 620), text_input="BACK", font=get_font(75), base_color="white", hovering_color="Green")
+		controls_back.color_changer(controls_mouse_pos)
+		controls_back.update(screen)
+
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+				sys.exit()
+			elif event.type == pygame.MOUSEBUTTONDOWN:
+				if controls_back.input_checker(controls_mouse_pos):
+					pause_menu(username)  # the difference is when the back button is pressed, it sends the user back to the pause screen
+
+		pygame.display.update()
+
+
+def main_menu():
+	while True:
+		screen.fill("#145365")
+		menu_mouse_pos = pygame.mouse.get_pos()
+		menu_text = get_font2(150).render("TETRIS", True, "#fd9b3dff")  # creates the main menu title text
+		menu_rect = menu_text.get_rect(center=(640, 125))
+		screen.blit(menu_text, menu_rect)
+
+		# creates all the buttons of the main menu
+		start_button = Button(image=pygame.image.load("start_button.png"), pos=(500, 300), text_input="START GAME", font=get_font(69), base_color="white", hovering_color="green")
+		scores_button = Button(image=pygame.image.load("scores_button.png"), pos=(500, 450), text_input="SCORES", font=get_font(75), base_color="white", hovering_color="green")
+		controls_button = Button(image=pygame.image.load("base_button.png"), pos=(780, 300), text_input="CONTROLS", font=get_font(75), base_color="white", hovering_color="green")
+		quit_button = Button(image=pygame.image.load("quit_button.png"), pos=(780, 450), text_input="QUIT GAME", font=get_font(75), base_color="white", hovering_color="green")
+
+		# creates the color change for all the buttons in a more efficient way by calling them all together in a for loop
+		for button in [start_button, scores_button, controls_button, quit_button]:
+			button.color_changer(menu_mouse_pos)
+			button.update(screen)
+
+		# gives all the buttons their feature
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+				sys.exit()
+			elif event.type == pygame.MOUSEBUTTONDOWN:
+				if start_button.input_checker(menu_mouse_pos):
+					username_input()
+				elif scores_button.input_checker(menu_mouse_pos):
+					scores()
+				elif controls_button.input_checker(menu_mouse_pos):
+					controls()
+				elif quit_button.input_checker(menu_mouse_pos):
+					pygame.quit()
+					sys.exit()
+
+		pygame.display.update()
+
+
+def pause_menu(username):
+	while True:
+		screen.fill("#145365")
+		pause_mouse_pos = pygame.mouse.get_pos()
+		pause_text = get_font2(100).render("Game Paused", True, "black")  # prints the game paused text
+		pause_rect = pause_text.get_rect(center=(640, 125))
+		screen.blit(pause_text, pause_rect)
+
+		# creates the username identification at the top left of the screen
+		id_text = pygame.font.SysFont("arial black", 20).render(f"User: {username}", True, "gray")
+		id_text_rect = id_text.get_rect(topleft=(20, 10))
+		if username == "":  # if the username is blank, the text is not put on the screen
+			pass
+		else:
+			screen.blit(id_text, id_text_rect)
+
+		# creates the buttons
+		resume_button = Button(image=pygame.image.load("start_button.png"), pos=(640, 250), text_input="RESUME PLAY", font=get_font(65), base_color="white", hovering_color="green")
+		controls_button = Button(image=pygame.image.load("base_button.png"), pos=(640, 400), text_input="CONTROLS", font=get_font(70), base_color="white", hovering_color="green")
+		menu_button = Button(image=pygame.image.load("scores_button.png"), pos=(640, 550), text_input="MAIN MENU", font=get_font(70), base_color="white", hovering_color="green")
+
+		# creates the color change for all buttons when hovered on, just like in the main menu
+		for button in [resume_button, menu_button, controls_button]:
+			button.color_changer(pause_mouse_pos)
+			button.update(screen)
+
+		# gives the buttons their function
+		for event in pygame.event.get():
+			if event.type == pygame.MOUSEBUTTONDOWN:
+				if resume_button.input_checker(pause_mouse_pos):
+					start(username)
+				elif menu_button.input_checker(pause_mouse_pos):
+					main_menu()
+				elif controls_button.input_checker(pause_mouse_pos):
+					controls_pause(username)
+			elif event.type == pygame.QUIT:
+				pygame.quit()
+				sys.exit()
+
+		pygame.display.update()
+
+
+main_menu()
